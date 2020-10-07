@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko
+spec:
+  template:
+    spec:
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        env:
+          - name: PROJECT
+            value: "csd"
+        args: ["--dockerfile=Dockerfile",
+               "--context=git://github.com/R-Lam/GHREPO.git#refs/heads/master",
+               "--destination=docker.io/rlam99/demo-user:v1.0"]
+        volumeMounts:
+        - name: kaniko-secret
+          mountPath: "/kaniko/.docker"
+      restartPolicy: Never
+      volumes:
+      - name: kaniko-secret
+        secret:
+          secretName: regcred
+          items:
+          - key: .dockerconfigjson
+            path: config.json
